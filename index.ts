@@ -13,11 +13,56 @@ console.log(systemName + " " + "v" + version);
 console.log("Bienvenido, " + userName);
 console.log("===========================");
 
+interface Task {
+    id: number;
+    title: string;
+    completed: boolean;
+}
 
-let tareas: string[] = [];
+let tareas: Task[] = [];
+let siguienteId: number = 1;
+
+//-funciones aplicadas
+const addTask = (title: string) => {
+    const nuevaTarea: Task = {
+        id: siguienteId,
+        title: title,
+        completed: false
+    };
+    tareas.push(nuevaTarea);
+    siguienteId++;
+
+    console.log("Tarea añadida: " + title);
+};
+const listTask = () => {
+
+    console.log("========TUS TAREAS=======")
+    if (tareas.length === 0) {
+        console.log("No hay tareas registradas.");
+    } else {
+        for (let i = 0; i < tareas.length; i++) {
+            const tarea = tareas[i];
+
+            if (tarea !== undefined) {
+                const estado = tarea.completed ? "completed" : "pending";
+
+                console.log("[" + tarea.id + "] " + tarea.title + " - " + estado);
+            }
+        }
+    }
+};
+const removeTask = () => {
+    const eliminada = tareas.pop();
+    if (eliminada !== undefined) {
+        console.log("Tarea eliminada: " + eliminada.title);
+    } else {
+        console.log("No hay tareas para eliminar.");
+    }
+};
 
 
 let opcion: string = "";
+
 while (opcion !== "4") {
     console.log("\n=====MENU DE TAREAS=====");
     console.log("1. Agregar Tarea");
@@ -29,30 +74,15 @@ while (opcion !== "4") {
     switch (opcion) {
         case "1": {
             const titulo = await rl.question("Escribre el titulo de la tarea: ");
-            tareas.push(titulo);
-            console.log("Tarea Añadida: " + titulo);
+            addTask(titulo);
             break;
         }
         case "2": {
-            const elimanada = tareas.pop();
-
-            if (elimanada !== undefined) {
-                console.log("Tarea Eliminada: " + elimanada);
-            } else {
-                console.log("No hay tareas para eliminar.");
-            }
+            removeTask();
             break;
         }
         case "3": {
-            console.log("======TUS TAREAS======");
-
-            if (tareas.length === 0) {
-                console.log("No hay tareas registradas.");
-            } else {
-                for (let i = 0; i < tareas.length; i++) {
-                    console.log((i + 1) + ". " + tareas[i]);
-                }
-            }
+            listTask();
             break;
         }
         case "4":
@@ -62,7 +92,9 @@ while (opcion !== "4") {
         default:
             console.log("Opcion no valida. Intente nuevamente.")
     }
-}
+};
+
+
 
 
 
