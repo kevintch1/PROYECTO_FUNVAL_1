@@ -1,5 +1,6 @@
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
+import { resolve } from 'node:dns';
 
 const rl = readline.createInterface({ input, output });
 // 🚫 No eliminar las líneas de arriba ⬆️
@@ -17,22 +18,46 @@ interface Task {
     id: number;
     title: string;
     completed: boolean;
-}
+};
+const saveToDB = (tarea: Task): Promise<Task> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            console.log("Tarea Guardada En La Base De Datos: " + tarea.title);
+            resolve(tarea);
+        }, 2000);
+
+    });
+};
 
 let tareas: Task[] = [];
 let siguienteId: number = 1;
 
 //-funciones aplicadas
-const addTask = (title: string) => {
-    const nuevaTarea: Task = {
-        id: siguienteId,
-        title: title,
-        completed: false
-    };
-    tareas.push(nuevaTarea);
-    siguienteId++;
+const addTask = async (title: string): Promise<void> => {
+    try {
+        if (title.trim() === "") {
+            throw new Error("El Titulo De La Tarea No Puede Estar vacio");
+        }
+        const nuevaTarea: Task = {
+            id: siguienteId,
+            title: title,
+            completed: false
+        };
+        await saveToDB(nuevaTarea);
 
-    console.log("Tarea añadida: " + title);
+        tareas.push(nuevaTarea);
+        siguienteId++;
+
+        console.log("Tarea añadida: " + title);
+
+    } catch (error) {
+
+        if (error instanceof Error) {
+            console.log("Error: " + error.message);
+        } else {
+            console.log("Ocurrio un Error Inesperado");
+        }
+    }
 };
 const listTask = () => {
 
@@ -50,13 +75,17 @@ const listTask = () => {
         });
     }
 };
-const removeTask = () => {
-    const eliminada = tareas.pop();
-    if (eliminada !== undefined) {
-        console.log("Tarea eliminada: " + eliminada.title);
+const removeTask = (id: number) => {
+    const indice = tareas.findIndex((t) => t.id === id);
+    if (indice !== -1) {
+        const eliminada = tareas.splice(indice, 1)[0];
+        if (eliminada) {
+            console.log("Tarea Eliminada : " + eliminada.title);
+        }
     } else {
-        console.log("No hay tareas para eliminar.");
+        console.log("No Se Encontro Una Tarea Con Ese Id.")
     }
+
 };
 // debo de crear 3 funcione 
 /* markCompleted
@@ -87,7 +116,7 @@ let opcion: string = "";
 while (opcion !== "7") {
     console.log("\n=====MENU DE TAREAS=====");
     console.log("1. Agregar Tarea");
-    console.log("2. Eliminar Ultima Tarea");
+    console.log("2. Eliminar Tarea Por ID");
     console.log("3. Listas De Tareas");
     console.log("4. Marcar Tarea Completada");
     console.log("5. Ver Tareas Pendiente");
@@ -97,12 +126,17 @@ while (opcion !== "7") {
 
     switch (opcion) {
         case "1": {
-            const titulo = await rl.question("Escribre el titulo de la tarea: ");
-            addTask(titulo);
+            const titulo = await rl.question("Escribe el titulo de la tarea: ");
+            await addTask(titulo);
+
             break;
         }
         case "2": {
-            removeTask();
+            const respuesta = await rl.question(
+                "Ingrese El Id De La Tarea Que Se Desea Eliminar: "
+            );
+            const id = Number(respuesta);
+            removeTask(id);
             break;
         }
         case "3": {
