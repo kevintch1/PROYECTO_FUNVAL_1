@@ -40,15 +40,14 @@ const listTask = () => {
     if (tareas.length === 0) {
         console.log("No hay tareas registradas.");
     } else {
-        for (let i = 0; i < tareas.length; i++) {
-            const tarea = tareas[i];
-
-            if (tarea !== undefined) {
-                const estado = tarea.completed ? "completed" : "pending";
-
-                console.log("[" + tarea.id + "] " + tarea.title + " - " + estado);
-            }
-        }
+        const tareasFormateadas = tareas.map((task) => {
+            const { id, title, completed } = task;
+            const estado = completed ? "Completado" : "Pending ";
+            return "[" + id + "] " + title + " - " + estado;
+        });
+        tareasFormateadas.forEach((texto) => {
+            console.log(texto);
+        });
     }
 };
 const removeTask = () => {
@@ -59,16 +58,41 @@ const removeTask = () => {
         console.log("No hay tareas para eliminar.");
     }
 };
+// debo de crear 3 funcione 
+/* markCompleted
+su objetivo es buscar una tarea por su numero y marcarla como completada*/
+const markCompleted = (id: number) => {
+    const tarea = tareas.find((t) => t.id === id);
+    if (tarea) {
+        tarea.completed = true;
+        console.log("Tarea completada: " + tarea.title);
+    } else {
+        console.log("Tarea no encontrada");
+    }
+};
+
+/*filterPendig*/
+const filterPendig = () => {
+    return tareas.filter((t) => t.completed === false);
+};
+
+/*y filterCompleted*/
+const filterCompleted = () => {
+    return tareas.filter((t) => t.completed === true);
+};
 
 
 let opcion: string = "";
 
-while (opcion !== "4") {
+while (opcion !== "7") {
     console.log("\n=====MENU DE TAREAS=====");
     console.log("1. Agregar Tarea");
     console.log("2. Eliminar Ultima Tarea");
     console.log("3. Listas De Tareas");
-    console.log("4. salir");
+    console.log("4. Marcar Tarea Completada");
+    console.log("5. Ver Tareas Pendiente");
+    console.log("6. Ver Tareas Completadas");
+    console.log("7. salir");
     opcion = await rl.question("Elige una opcion: ");
 
     switch (opcion) {
@@ -85,9 +109,43 @@ while (opcion !== "4") {
             listTask();
             break;
         }
-        case "4":
+        case "4": {
+            const respuesta = await rl.question(
+                "Ingrese el ID de la tarea que completes: "
+            );
+            const id = Number(respuesta);
+            markCompleted(id);
+            break;
+        }
+        case "5": {
+            console.log("\n====== TAREAS PENDIENTES ======");
+            const pendientes = filterPendig();
+            if (pendientes.length === 0) {
+                console.log("No hay Tareas Pendientes");
+            } else {
+                pendientes.forEach((tarea) => {
+                    console.log("[" + tarea.id + "] " + tarea.title + "- pending");
+                });
+            }
+            break;
+        }
+        case "6": {
+            console.log("\n======== TAREAS COMPLETAS ========");
+            const completadas = filterCompleted();
+            if (completadas.length === 0) {
+                console.log("No Hay Tareas Completadas");
+            } else {
+                completadas.forEach((tarea) => {
+                    console.log("[" + tarea.id + "] " + tarea.title + "- completed");
+                });
+            }
+            break;
+        }
+
+        case "7":
             console.log("Saliendo del programa... bye bye");
             break;
+
 
         default:
             console.log("Opcion no valida. Intente nuevamente.")
